@@ -1,7 +1,8 @@
 CC = g++
 DEBUG = -g
-CFLAGS = -Wall -c $(DEBUG)
-LFLAGS = -Wall $(DEBUG)
+INCLUDE = /usr/local/boost_1_61_0
+CFLAGS = -Wall -I $(INCLUDE) -std=c++11 -c $(DEBUG)
+LFLAGS = -Wall -I $(INCLUDE) -std=c++11 $(DEBUG)
 EXE = game-of-life
 
 $(EXE): main.o lifeGrid.o
