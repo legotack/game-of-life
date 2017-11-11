@@ -1,6 +1,6 @@
 #include <iostream>
 #include "lifeGrid.h"
-#include <limits>
+#include <SDL2/SDL.h>
 
 using namespace std;
 
@@ -10,6 +10,7 @@ int main() {
 	while (true) {
 		cout << grid << endl;
 		grid.tick();
+		SDL_Delay(500);
 	}
 
 	return 0;

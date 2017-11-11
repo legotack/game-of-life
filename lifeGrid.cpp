@@ -40,15 +40,37 @@ LifeGrid::LifeGrid(LifeGrid& copy) {
 	aliveSet = copy.aliveSet;
 }
 
+// make better
+coordinate LifeGrid::wrapCoordinate(const long x, const long y) const {
+	long wrappedX, wrappedY;
+	if (x > bounds.maxX) {
+		wrappedX = (x - bounds.maxX - 1) + bounds.minX;
+	} else if (x < bounds.minX) {
+		wrappedX = (x - bounds.minX + 1) + bounds.maxX;
+	} else {
+		wrappedX = x;
+	}
+
+	if (y > bounds.maxY) {
+		wrappedY = (y - bounds.maxY - 1) + bounds.minY;
+	} else if (y < bounds.minY) {
+		wrappedY = (y - bounds.minY + 1) + bounds.maxY;
+	} else {
+		wrappedY = y;
+	}
+
+	return { wrappedX, wrappedY };
+}
+
 bool LifeGrid::isAlive(const long x, const long y) const {
-	return aliveSet.find({ x, y }) != aliveSet.end();
+	return aliveSet.find(wrapCoordinate(x, y)) != aliveSet.end();
 }
 
 void LifeGrid::setAlive(const long x, const long y, const bool alive) {
 	if (alive)
-		aliveSet.insert({ x, y });
+		aliveSet.insert(wrapCoordinate(x, y));
 	else
-		aliveSet.erase({ x, y });
+		aliveSet.erase(wrapCoordinate(x, y));
 }
 
 // see if you can do this smarter, to only look near alive cells

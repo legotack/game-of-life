@@ -36,6 +36,8 @@ private:
 	setType aliveSet;
 	boundaries bounds;
 
+	coordinate wrapCoordinate(const long x, const long y) const;
+
 	int countAliveNeighbors(const long row, const long col) const;
 
 	friend std::ostream& operator<<(std::ostream& stream, const LifeGrid& gr);
