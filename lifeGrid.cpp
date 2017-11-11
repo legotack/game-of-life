@@ -11,15 +11,16 @@ long strToLong(string str);
 /* regex pattern to match input in the form "(x, y)" */
 const regex INPUT_PATTERN("\\((-?[0-9]+),\\s*(-?[0-9]+)\\)");
 
-LifeGrid::LifeGrid(istream& input) {
-	minRow = maxRow = minCol = maxCol = 0;
+LifeGrid::LifeGrid(istream& input, size_t radius) {
+	bounds.minX = bounds.minY = -radius;
+	bounds.maxX = bounds.maxY = radius;
 
 	string line;
 	getline(input, line);
 	while (!input.eof() && line != "") {
 		smatch matches;
 		if (regex_match(line, matches, INPUT_PATTERN)) {
-			setCell(strToLong(matches[1]), strToLong(matches[2]), true);
+			setAlive(strToLong(matches[1]), strToLong(matches[2]), true);
 		} else {
 			// make this pretty
 			throw "Invalid input: " + line;
@@ -36,46 +37,39 @@ long strToLong(string str) {
 }
 
 LifeGrid::LifeGrid(LifeGrid& copy) {
-	grid = copy.grid;
+	aliveSet = copy.aliveSet;
 }
 
-void LifeGrid::setCell(const long row, const long col, const bool alive) {
-	if (row < minRow) minRow = row;
-	if (row > maxRow) maxRow = row;
-	if (col < minCol) minCol = col;
-	if (col > maxCol) maxCol = col;
-
-	grid[{ row, col }] = alive;
+bool LifeGrid::isAlive(const long x, const long y) const {
+	return aliveSet.find({ x, y }) != aliveSet.end();
 }
 
-bool LifeGrid::getCell(const long row, const long col) const {
-	auto elem = grid.find({ row, col });
-	if (elem == grid.end()) return false;
-	else return elem->second;
+void LifeGrid::setAlive(const long x, const long y, const bool alive) {
+	if (alive)
+		aliveSet.insert({ x, y });
+	else
+		aliveSet.erase({ x, y });
 }
 
+// see if you can do this smarter, to only look near alive cells
 void LifeGrid::tick() {
-	LifeGrid newGrid(*this);
-
-	for (long i = minRow; i <= maxRow; ++i) {
-		for (long j = minCol; j <= maxCol; ++j) {
-			int aliveNeighbors = countAliveNeighbors(i, j);
-			if (aliveNeighbors == 3 || (aliveNeighbors == 2 && getCell(i, j)))
-				newGrid.setCell(i, j, true);
-			else
-				newGrid.setCell(i, j, false);
+	setType newSet(aliveSet.bucket_count());
+	for (long i = bounds.minY; i <= bounds.maxY; ++i) {
+		for (long j = bounds.minX; j <= bounds.maxX; ++j) {
+			int aliveNeighbors = countAliveNeighbors(j, i);
+			if (aliveNeighbors == 3 || (aliveNeighbors == 2 && isAlive(j, i)))
+				newSet.insert({ j, i }); // to avoid this, make setType into a class (with better name)
 		}
 	}
-
-	grid = newGrid.grid;
+	aliveSet = newSet;
 }
 
-int LifeGrid::countAliveNeighbors(const long row, const long col) const {
+int LifeGrid::countAliveNeighbors(const long x, const long y) const {
 	int counter = 0;
-	for (long i = row - 1; i <= row + 1; ++i) {
-		for (long j = col - 1; j <= col + 1; ++j) {
-			if (i != row || j != col) {
-				if (getCell(i, j))
+	for (long i = y - 1; i <= y + 1; ++i) {
+		for (long j = x - 1; j <= x + 1; ++j) {
+			if (i != y || j != x) {
+				if (isAlive(j, i))
 					++counter;
 			}
 		}
@@ -84,9 +78,11 @@ int LifeGrid::countAliveNeighbors(const long row, const long col) const {
 }
 
 ostream& operator<<(ostream& stream, const LifeGrid& gr) {
-	for (long i = gr.minRow; i <= gr.maxRow; ++i) {
-		for (long j = gr.minCol; j <= gr.maxCol; ++j) {
-			if (gr.getCell(i, j))
+	for (long i = gr.bounds.minY; i <= gr.bounds.maxY; ++i) {
+		for (long j = gr.bounds.minX; j <= gr.bounds.maxX; ++j) {
+			if (i == 0 && j == 0)
+				stream << "O "; // marks the center
+			else if (gr.isAlive(j, i))
 				stream << "X ";
 			else
 				stream << "- ";

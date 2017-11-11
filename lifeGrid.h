@@ -9,26 +9,32 @@
 #pragma once
 
 #include <iostream>
-#include <map>
+#include <unordered_set>
+#include <boost/functional/hash.hpp>
 
 // row and column may be reversed
 
 // ADD THIS IN EVENTAULLY!
 //using cells = unsigned char; // each bit corresponds to one cell
-using gridType = std::map<std::pair<long, long>, bool>;
+using coordinate = std::pair<long, long>;
+using setType = std::unordered_set<coordinate, boost::hash<coordinate>>;
+
+struct boundaries {
+	long minX, maxX, minY, maxY;
+};
 
 class LifeGrid {
 public:
-	LifeGrid(std::istream& input);
+	LifeGrid(std::istream& input, size_t radius);
 	LifeGrid(LifeGrid &copy);
 
-	void setCell(const long row, const long col, const bool alive);
-	bool getCell(const long row, const long col) const;
+	bool isAlive(const long x, const long y) const;
+	void setAlive(const long x, const long y, const bool alive);
 
 	void tick();
 private:
-	gridType grid;
-	long minRow, maxRow, minCol, maxCol;
+	setType aliveSet;
+	boundaries bounds;
 
 	int countAliveNeighbors(const long row, const long col) const;
 

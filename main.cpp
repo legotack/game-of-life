@@ -5,7 +5,7 @@
 using namespace std;
 
 int main() {
-	LifeGrid grid(cin);
+	LifeGrid grid(cin, 5);
 
 	while (true) {
 		cout << grid << endl;
