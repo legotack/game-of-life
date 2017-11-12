@@ -1,39 +1,16 @@
 #include "lifeGrid.h"
-#include <regex>
-#include <string>
-#include <sstream>
-#include <limits>
 
 using namespace std;
 
-long strToLong(string str);
-
-/* regex pattern to match input in the form "(x, y)" */
-const regex INPUT_PATTERN("\\((-?[0-9]+),\\s*(-?[0-9]+)\\)");
-
-LifeGrid::LifeGrid(istream& input, size_t radius) {
+LifeGrid::LifeGrid(size_t radiusIn)
+	: radius(radiusIn) {
 	bounds.minX = bounds.minY = -radius;
 	bounds.maxX = bounds.maxY = radius;
-
-	string line;
-	getline(input, line);
-	while (!input.eof() && line != "") {
-		smatch matches;
-		if (regex_match(line, matches, INPUT_PATTERN)) {
-			setAlive(strToLong(matches[1]), strToLong(matches[2]), true);
-		} else {
-			// make this pretty
-			throw "Invalid input: " + line;
-		}
-		getline(input, line);
-	}
 }
 
-long strToLong(string str) {
-	stringstream stream(str);
-	long result;
-	stream >> result;
-	return result;
+LifeGrid::LifeGrid(size_t radiusIn, size_t numBuckets)
+	: LifeGrid::LifeGrid(radiusIn) {
+	aliveSet.rehash(numBuckets);
 }
 
 LifeGrid::LifeGrid(LifeGrid& copy) {
@@ -42,22 +19,13 @@ LifeGrid::LifeGrid(LifeGrid& copy) {
 
 // make better
 coordinate LifeGrid::wrapCoordinate(const long x, const long y) const {
-	long wrappedX, wrappedY;
-	if (x > bounds.maxX) {
-		wrappedX = (x - bounds.maxX - 1) + bounds.minX;
-	} else if (x < bounds.minX) {
-		wrappedX = (x - bounds.minX + 1) + bounds.maxX;
-	} else {
-		wrappedX = x;
-	}
+	long absoluteMaxX = bounds.maxX - bounds.minX + 1;
+	long absoluteMaxY = bounds.maxY - bounds.minY + 1;
+	long translatedX = x - bounds.minX;
+	long translatedY = y - bounds.minY;
 
-	if (y > bounds.maxY) {
-		wrappedY = (y - bounds.maxY - 1) + bounds.minY;
-	} else if (y < bounds.minY) {
-		wrappedY = (y - bounds.minY + 1) + bounds.maxY;
-	} else {
-		wrappedY = y;
-	}
+	long wrappedX = (absoluteMaxX + translatedX % absoluteMaxX) % absoluteMaxX + bounds.minX;
+	long wrappedY = (absoluteMaxY + translatedY % absoluteMaxY) % absoluteMaxY + bounds.minY;
 
 	return { wrappedX, wrappedY };
 }
@@ -66,24 +34,28 @@ bool LifeGrid::isAlive(const long x, const long y) const {
 	return aliveSet.find(wrapCoordinate(x, y)) != aliveSet.end();
 }
 
-void LifeGrid::setAlive(const long x, const long y, const bool alive) {
+void LifeGrid::setAlive(const coordinate cell, const bool alive) {
 	if (alive)
-		aliveSet.insert(wrapCoordinate(x, y));
+		aliveSet.insert(wrapCoordinate(cell.first, cell.second));
 	else
-		aliveSet.erase(wrapCoordinate(x, y));
+		aliveSet.erase(wrapCoordinate(cell.first, cell.second));
 }
 
-// see if you can do this smarter, to only look near alive cells
-void LifeGrid::tick() {
-	setType newSet(aliveSet.bucket_count());
-	for (long i = bounds.minY; i <= bounds.maxY; ++i) {
-		for (long j = bounds.minX; j <= bounds.maxX; ++j) {
-			int aliveNeighbors = countAliveNeighbors(j, i);
-			if (aliveNeighbors == 3 || (aliveNeighbors == 2 && isAlive(j, i)))
-				newSet.insert({ j, i }); // to avoid this, make setType into a class (with better name)
-		}
-	}
-	aliveSet = newSet;
+void LifeGrid::setAlive(const long x, const long y, const bool alive) {
+	setAlive({ x, y }, alive);
+}
+
+setType LifeGrid::getAliveCells() {
+	return aliveSet;
+}
+
+size_t LifeGrid::getNumBuckets() {
+	return aliveSet.bucket_count();
+}
+
+bool LifeGrid::aliveNextGen(const long x, const long y) const {
+	int aliveNeighbors = countAliveNeighbors(x, y);
+	return aliveNeighbors == 3 || (aliveNeighbors == 2 && isAlive(x, y));
 }
 
 int LifeGrid::countAliveNeighbors(const long x, const long y) const {

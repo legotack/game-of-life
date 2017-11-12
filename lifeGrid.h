@@ -14,8 +14,6 @@
 
 // row and column may be reversed
 
-// ADD THIS IN EVENTAULLY!
-//using cells = unsigned char; // each bit corresponds to one cell
 using coordinate = std::pair<long, long>;
 using setType = std::unordered_set<coordinate, boost::hash<coordinate>>;
 
@@ -25,20 +23,27 @@ struct boundaries {
 
 class LifeGrid {
 public:
-	LifeGrid(std::istream& input, size_t radius);
+	LifeGrid(size_t radiusIn);
+	LifeGrid(size_t radiusIn, size_t numBuckets);
 	LifeGrid(LifeGrid &copy);
 
-	bool isAlive(const long x, const long y) const;
-	void setAlive(const long x, const long y, const bool alive);
+	boundaries bounds;
+	size_t radius;
 
-	void tick();
+	bool isAlive(const long x, const long y) const;
+	void setAlive(const coordinate cell, const bool alive);
+	void setAlive(const long x, const long y, const bool alive); // LEAVE OPTION TO EXTEND WORLD FOR INPUT
+
+	bool aliveNextGen(const long x, const long y) const;
+
+	setType getAliveCells();
+	size_t getNumBuckets();
 private:
 	setType aliveSet;
-	boundaries bounds;
 
 	coordinate wrapCoordinate(const long x, const long y) const;
 
-	int countAliveNeighbors(const long row, const long col) const;
+	int countAliveNeighbors(const long x, const long y) const;
 
 	friend std::ostream& operator<<(std::ostream& stream, const LifeGrid& gr);
 };
