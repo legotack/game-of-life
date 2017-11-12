@@ -95,19 +95,19 @@ void LifeGraphics::colorCell(const coordinate& cell) {
 	SDL_RenderFillRect(renderer, &rect);
 }
 
-void LifeGraphics::colorAliveCells(setType aliveCells) {
+void LifeGraphics::colorAliveCells(const setType& aliveCells) {
 	SDL_SetRenderDrawColor(renderer, 255, 255, 255, SDL_ALPHA_OPAQUE);
 	for_each(aliveCells.begin(), aliveCells.end(), [this](const coordinate& cell) { colorCell(translateCoordinate(cell)); });
 }
 
-void LifeGraphics::handleEvent(SDL_Event& event) {
+void LifeGraphics::handleEvent(const SDL_Event& event) {
 	if (event.type == SDL_MOUSEBUTTONDOWN) {
 		if (event.button.button == SDL_BUTTON_LEFT) {
-			grid->setAlive(windowToCell(event.motion.x, event.motion.y), true);
+			clickedOnCell(event.button.x, event.button.y);
 		}
 	} else if (event.type == SDL_MOUSEMOTION) {
 		if (event.motion.state & SDL_BUTTON_LMASK) {
-			grid->setAlive(windowToCell(event.motion.x, event.motion.y), true);
+			clickedOnCell(event.motion.x, event.motion.y);
 		}
 	} else if (event.type == SDL_KEYDOWN && event.key.repeat == 0) {
 		switch (event.key.keysym.sym) {
@@ -116,4 +116,9 @@ void LifeGraphics::handleEvent(SDL_Event& event) {
 				break;
 		}
 	}
+}
+
+void LifeGraphics::clickedOnCell(const int mouseX, const int mouseY) {
+	if (mouseY != 0) // to keep from title bar clicks
+		grid->setAlive(windowToCell(mouseX, mouseY), true);
 }

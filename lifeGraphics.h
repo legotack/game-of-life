@@ -32,7 +32,8 @@ private:
 	void colorCell(const coordinate& cell);
 
 	void drawLines(size_t numColumns, size_t numRows);
-	void colorAliveCells(setType aliveCells);
+	void colorAliveCells(const setType& aliveCells);
 
-	void handleEvent(SDL_Event& event);
+	void handleEvent(const SDL_Event& event);
+	void clickedOnCell(const int mouseX, const int mouseY);
 };

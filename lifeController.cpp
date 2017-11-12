@@ -17,7 +17,7 @@ LifeController::LifeController(LifeGrid *gridIn, istream& input)
 	: grid(gridIn) {
 	string line;
 	getline(input, line);
-	while (!input.eof() && line != "") {
+	while (line != "") {
 		smatch matches;
 		if (regex_match(line, matches, INPUT_PATTERN)) {
 			grid->setAlive(strToLong(matches[1]), strToLong(matches[2]), true);
@@ -25,6 +25,7 @@ LifeController::LifeController(LifeGrid *gridIn, istream& input)
 			// make this pretty
 			throw "Invalid input: " + line;
 		}
+		if (input.eof()) break;
 		getline(input, line);
 	}
 }

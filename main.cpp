@@ -1,6 +1,7 @@
 #include <iostream>
 #include "lifeController.h"
 #include "lifeGraphics.h"
+#include "lifeSamples.h"
 #include <SDL2/SDL.h>
 #include <sstream>
 
@@ -13,12 +14,12 @@ const int SPEED = 100;
 const string SAMPLE_INPUT = "(1, 0)\n(2, 1)\n(2, 2)\n(1, 2)\n(0, 2)\n(-2000000000002, -2000000000000)\n(-2000000000001, -2000000000000)\n(-2000000000000, -2000000000000)\n";
 
 int main() {
-	LifeGrid *grid = new LifeGrid(20);
+	LifeGrid grid(20);
 
-	LifeGraphics graphics(grid, WINDOW_WIDTH, WINDOW_HEIGHT);
+	LifeGraphics graphics(&grid, WINDOW_WIDTH, WINDOW_HEIGHT);
 
-	stringstream stream(SAMPLE_INPUT);
-	LifeController controller(grid);
+	stringstream stream(LifeSamples::samples["Glider"]);
+	LifeController controller(&grid, stream);
 
 	while (!graphics.quit) {
 		//controller.outputWorld(cout);
@@ -27,8 +28,6 @@ int main() {
 		if (!graphics.paused) controller.tick();
 		SDL_Delay(SPEED);
 	}
-
-	delete grid;
 
 	return 0;
 }

@@ -9,7 +9,7 @@ EXE = game-of-life
 $(EXE): main.o lifeController.o lifeGrid.o lifeGraphics.o
 	$(CC) $(LFLAGS) main.o lifeController.o lifeGrid.o lifeGraphics.o -o game-of-life
 
-main.o: main.cpp lifeController.h
+main.o: main.cpp lifeController.h lifeGraphics.h lifeSamples.h
 	$(CC) $(CFLAGS) main.cpp
 
 lifeController.o: lifeController.h lifeController.cpp lifeGrid.h
@@ -18,7 +18,7 @@ lifeController.o: lifeController.h lifeController.cpp lifeGrid.h
 lifeGrid.o: lifeGrid.h lifeGrid.cpp
 	$(CC) $(CFLAGS) lifeGrid.cpp
 
-lifeGraphics.o: lifeGraphics.h lifeGraphics.cpp
+lifeGraphics.o: lifeGraphics.h lifeGraphics.cpp lifeGrid.h
 	$(CC) $(CFLAGS) lifeGraphics.cpp
 
 clean:
