@@ -1,11 +1,15 @@
 #include "lifeGraphics.h"
 #include <iostream>
+#include <algorithm>
+#include <math.h>
 
 using namespace std;
 
-const int SPEED = 100;
-const double DELTA_TRANSLATION = 20; // in screen units
-const double DELTA_ZOOM = 0.2;
+const int DELAY = 1;
+const double DELTA_TRANSLATION = 2.5; // in screen units
+const double DELTA_ZOOM = 1.01;
+const double SMALLEST_CELL_SIZE = 10;
+const double AUTOZOOM_CELL_SIZE = 50;
 
 LifeGraphics::LifeGraphics(LifeGrid *gridIn, int width, int height)
 	: grid(gridIn), menu(width, height - width),
@@ -58,6 +62,7 @@ void LifeGraphics::tick() {
 		if (event.type == SDL_QUIT) quit = true;
 		handleEvent(event);
 	}
+	handleKeys();
 
 	size_t gridSize = grid->radius * 2 + 1;
 	cellWidth = (double)simulationWidth / gridSize;
@@ -68,22 +73,27 @@ void LifeGraphics::tick() {
 
 	SDL_RenderPresent(renderer);
 
-	SDL_Delay(SPEED);
+	SDL_Delay(DELAY);
 }
 
 void LifeGraphics::drawLines(size_t numColumns, size_t numRows) {
-	if (numColumns > 50) numColumns = 20;
-	if (numRows > 50) numRows = 20;
+	if (cellWidth * zoom < SMALLEST_CELL_SIZE)
+		numColumns = zoom * simulationWidth / SMALLEST_CELL_SIZE;
+	if (cellHeight * zoom < SMALLEST_CELL_SIZE)
+		numRows = zoom * simulationHeight / SMALLEST_CELL_SIZE;
 
 	double deltaX = zoom * simulationWidth / numColumns;
 	double deltaY = zoom * simulationHeight / numRows;
 
+	double offsetX = fmod(translation.first, deltaX);
+	double offsetY = fmod(translation.second, deltaY);
+
 	SDL_SetRenderDrawColor(renderer, 0, 192, 255, SDL_ALPHA_OPAQUE);
-	for (int x = 0; x <= numColumns; ++x) {
-		SDL_RenderDrawLine(renderer, x * deltaX + translation.first, translation.second, x * deltaX + translation.first, simulationHeight * zoom + translation.second);
+	for (double x = max(offsetX, translation.first); x - translation.first <= deltaX * numColumns && x <= simulationWidth; x += deltaX) {
+		SDL_RenderDrawLine(renderer, x, translation.second, x, simulationHeight * zoom + translation.second);
 	}
-	for (int y = 0; y <= numRows; ++y) {
-		SDL_RenderDrawLine(renderer, translation.first, y * deltaY + translation.second, simulationWidth * zoom + translation.first, y * deltaY + translation.second);
+	for (double y = max(offsetY, translation.second); y - translation.second <= deltaY * numRows && y <= simulationHeight; y += deltaY) {
+		SDL_RenderDrawLine(renderer, translation.first, y, simulationWidth * zoom + translation.first, y);
 	}
 }
 
@@ -134,33 +144,62 @@ void LifeGraphics::handleEvent(const SDL_Event& event) {
 				menu.handleClick(event.motion.x, event.motion.y);
 		}
 	} else if (event.type == SDL_KEYDOWN && event.key.repeat == 0) {
-		switch (event.key.keysym.sym) {
-			case SDLK_SPACE:
-				paused = !paused;
-				break;
-			case SDLK_UP:
-				zoom += DELTA_ZOOM;
-				break;
-			case SDLK_DOWN:
-				zoom -= DELTA_ZOOM;
-				break;
-			case SDLK_w:
-				translation.second += DELTA_TRANSLATION;
-				break;
-			case SDLK_a:
-				translation.first += DELTA_TRANSLATION;
-				break;
-			case SDLK_s:
-				translation.second -= DELTA_TRANSLATION;
-				break;
-			case SDLK_d:
-				translation.first -= DELTA_TRANSLATION;
-				break;
-		}
+		if (event.key.keysym.sym == SDLK_SPACE)
+			paused = !paused;
+		else if (event.key.keysym.sym == SDLK_z)
+			autozoom();
+
+		/*if (event.key.keysym.sym == SDLK_UP)
+			zoom += DELTA_ZOOM;
+		if (event.key.keysym.sym == SDLK_DOWN)
+			zoom -= DELTA_ZOOM;
+
+		if (event.key.keysym.sym == SDLK_w)
+			translation.second += DELTA_TRANSLATION;
+		if (event.key.keysym.sym == SDLK_a)
+			translation.first += DELTA_TRANSLATION;
+		if (event.key.keysym.sym == SDLK_s)
+			translation.second -= DELTA_TRANSLATION;
+		if (event.key.keysym.sym == SDLK_d)
+			translation.first -= DELTA_TRANSLATION;*/
 	}
+}
+
+void LifeGraphics::handleKeys() {
+	const Uint8 *state = SDL_GetKeyboardState(nullptr);
+	if (state[SDL_SCANCODE_UP]) {
+		zoomBy(DELTA_ZOOM);
+	}
+	if (state[SDL_SCANCODE_DOWN]) {
+		zoomBy(1 / DELTA_ZOOM);
+	}
+
+	if (state[SDL_SCANCODE_W])
+		translation.second += DELTA_TRANSLATION;
+	if (state[SDL_SCANCODE_A])
+		translation.first += DELTA_TRANSLATION;
+	if (state[SDL_SCANCODE_S])
+		translation.second -= DELTA_TRANSLATION;
+	if (state[SDL_SCANCODE_D])
+		translation.first -= DELTA_TRANSLATION;
 }
 
 void LifeGraphics::clickedOnCell(const int mouseX, const int mouseY) {
 	if (mouseY != 0) // to keep from title bar clicks
 		grid->setAlive(windowToCell(mouseX, mouseY), true);
+}
+
+void LifeGraphics::zoomBy(const double zoomAmount) {
+	zoom *= zoomAmount;
+	translation.first = (translation.first - simulationWidth / 2) * zoomAmount + simulationWidth / 2;
+	translation.second = (translation.second - simulationHeight / 2) * zoomAmount + simulationHeight / 2;
+}
+
+void LifeGraphics::autozoom() {
+	coordinate cell = *(grid->getAliveCells().begin());
+	translation = { 0, 0 };
+	zoom = 1;
+	zoomBy(AUTOZOOM_CELL_SIZE / cellWidth);
+	translation.first -= AUTOZOOM_CELL_SIZE * cell.first;
+	translation.second -= AUTOZOOM_CELL_SIZE * cell.second;
 }

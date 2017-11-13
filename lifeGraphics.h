@@ -31,8 +31,8 @@ private:
 	double cellWidth;
 	double cellHeight;
 
-	double zoom;
 	windowCoordinate translation;
+	double zoom;
 
 	int loadSDL();
 
@@ -47,5 +47,9 @@ private:
 	void colorAliveCells(const setType& aliveCells);
 
 	void handleEvent(const SDL_Event& event);
+	void handleKeys();
 	void clickedOnCell(const int mouseX, const int mouseY);
+
+	void zoomBy(const double zoomAmount);
+	void autozoom();
 };
