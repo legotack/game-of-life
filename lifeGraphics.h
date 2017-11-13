@@ -8,10 +8,12 @@ using windowCoordinate = std::pair<double, double>;
 
 class LifeGraphics {
 public:
-	LifeGraphics(LifeGrid *gridIn, int width, int height);
+	LifeGraphics(LifeGrid *gridIn, int width, int height, int speedIn);
 	~LifeGraphics();
 
 	void tick();
+
+	int getSpeed();
 
 	bool paused;
 	bool quit;
@@ -34,6 +36,8 @@ private:
 	windowCoordinate translation;
 	double zoom;
 
+	int evolutionSpeed;
+
 	int loadSDL();
 
 	windowCoordinate scaleCoordinate(const windowCoordinate& coord);
@@ -52,4 +56,6 @@ private:
 
 	void zoomBy(const double zoomAmount);
 	void autozoom();
+
+	void changeSpeed(const int change);
 };

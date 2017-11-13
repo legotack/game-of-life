@@ -11,10 +11,11 @@ const double DELTA_ZOOM = 1.01;
 const double SMALLEST_CELL_SIZE = 10;
 const double AUTOZOOM_CELL_SIZE = 50;
 
-LifeGraphics::LifeGraphics(LifeGrid *gridIn, int width, int height)
+LifeGraphics::LifeGraphics(LifeGrid *gridIn, int width, int height, int speedIn)
 	: grid(gridIn), menu(width, height - width),
 	windowWidth(width), windowHeight(height),
-	simulationWidth(width), simulationHeight(width) {
+	simulationWidth(width), simulationHeight(width),
+	evolutionSpeed(speedIn) {
 	zoom = 1;
 	quit = false;
 	paused = false;
@@ -143,11 +144,15 @@ void LifeGraphics::handleEvent(const SDL_Event& event) {
 			else
 				menu.handleClick(event.motion.x, event.motion.y);
 		}
-	} else if (event.type == SDL_KEYDOWN && event.key.repeat == 0) {
-		if (event.key.keysym.sym == SDLK_SPACE)
+	} else if (event.type == SDL_KEYDOWN) {
+		if (event.key.keysym.sym == SDLK_SPACE && event.key.repeat == 0)
 			paused = !paused;
-		else if (event.key.keysym.sym == SDLK_z)
+		else if (event.key.keysym.sym == SDLK_z && event.key.repeat == 0)
 			autozoom();
+		else if (event.key.keysym.sym == SDLK_LEFT)
+			changeSpeed(1);
+		else if (event.key.keysym.sym == SDLK_RIGHT)
+			changeSpeed(-1);
 	}
 }
 
@@ -188,4 +193,12 @@ void LifeGraphics::autozoom() {
 	zoomBy(AUTOZOOM_CELL_SIZE / cellWidth);
 	translation.first -= AUTOZOOM_CELL_SIZE * cell.first;
 	translation.second -= AUTOZOOM_CELL_SIZE * cell.second;
+}
+
+int LifeGraphics::getSpeed() {
+	return evolutionSpeed;
+}
+
+void LifeGraphics::changeSpeed(const int change) {
+	evolutionSpeed = max(evolutionSpeed + change, 1);
 }

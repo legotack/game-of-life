@@ -9,14 +9,14 @@ using namespace std;
 
 const size_t WINDOW_WIDTH = 640;
 const size_t WINDOW_HEIGHT = 640; // 720 for menu
-const int EVOLUTION_SPEED = 5;
+const int INITIAL_SPEED = 5;
 
 const string SAMPLE_INPUT = "(1, 0)\n(2, 1)\n(2, 2)\n(1, 2)\n(0, 2)\n(-2000000000002, -2000000000000)\n(-2000000000001, -2000000000000)\n(-2000000000000, -2000000000000)\n";
 
 int main(int argc, char *argv[]) {
-	LifeGrid grid(2000000000000);
+	LifeGrid grid(100);
 
-	LifeGraphics graphics(&grid, WINDOW_WIDTH, WINDOW_HEIGHT);
+	LifeGraphics graphics(&grid, WINDOW_WIDTH, WINDOW_HEIGHT, INITIAL_SPEED);
 
 	LifeController controller;
 	if (argc < 2) {
@@ -34,7 +34,7 @@ int main(int argc, char *argv[]) {
 		//controller.outputWorld(cout);
 		graphics.tick();
 		// experiment with order of these
-		if (sinceLastGeneration == EVOLUTION_SPEED) {
+		if (sinceLastGeneration >= graphics.getSpeed()) {
 			controller.tick();
 			sinceLastGeneration = 0;
 		}
