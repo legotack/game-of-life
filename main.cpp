@@ -14,7 +14,7 @@ const int EVOLUTION_SPEED = 5;
 const string SAMPLE_INPUT = "(1, 0)\n(2, 1)\n(2, 2)\n(1, 2)\n(0, 2)\n(-2000000000002, -2000000000000)\n(-2000000000001, -2000000000000)\n(-2000000000000, -2000000000000)\n";
 
 int main(int argc, char *argv[]) {
-	LifeGrid grid(200000000000);
+	LifeGrid grid(2000000000000);
 
 	LifeGraphics graphics(&grid, WINDOW_WIDTH, WINDOW_HEIGHT);
 

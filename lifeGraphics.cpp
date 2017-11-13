@@ -90,10 +90,10 @@ void LifeGraphics::drawLines(size_t numColumns, size_t numRows) {
 
 	SDL_SetRenderDrawColor(renderer, 0, 192, 255, SDL_ALPHA_OPAQUE);
 	for (double x = max(offsetX, translation.first); x - translation.first <= deltaX * numColumns && x <= simulationWidth; x += deltaX) {
-		SDL_RenderDrawLine(renderer, x, translation.second, x, simulationHeight * zoom + translation.second);
+		SDL_RenderDrawLine(renderer, x, max(0.0, translation.second), x, min(simulationHeight * zoom + translation.second, (double)simulationHeight));
 	}
 	for (double y = max(offsetY, translation.second); y - translation.second <= deltaY * numRows && y <= simulationHeight; y += deltaY) {
-		SDL_RenderDrawLine(renderer, translation.first, y, simulationWidth * zoom + translation.first, y);
+		SDL_RenderDrawLine(renderer, max(0.0, translation.first), y, min(simulationWidth * zoom + translation.first, (double)simulationWidth), y);
 	}
 }
 
@@ -148,20 +148,6 @@ void LifeGraphics::handleEvent(const SDL_Event& event) {
 			paused = !paused;
 		else if (event.key.keysym.sym == SDLK_z)
 			autozoom();
-
-		/*if (event.key.keysym.sym == SDLK_UP)
-			zoom += DELTA_ZOOM;
-		if (event.key.keysym.sym == SDLK_DOWN)
-			zoom -= DELTA_ZOOM;
-
-		if (event.key.keysym.sym == SDLK_w)
-			translation.second += DELTA_TRANSLATION;
-		if (event.key.keysym.sym == SDLK_a)
-			translation.first += DELTA_TRANSLATION;
-		if (event.key.keysym.sym == SDLK_s)
-			translation.second -= DELTA_TRANSLATION;
-		if (event.key.keysym.sym == SDLK_d)
-			translation.first -= DELTA_TRANSLATION;*/
 	}
 }
 
