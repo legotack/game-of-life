@@ -4,7 +4,7 @@
 using namespace std;
 
 const int SPEED = 100;
-const double DELTA_TRANSLATION = 1.5;
+const double DELTA_TRANSLATION = 20; // in screen units
 const double DELTA_ZOOM = 0.2;
 
 LifeGraphics::LifeGraphics(LifeGrid *gridIn, int width, int height)
@@ -80,15 +80,15 @@ void LifeGraphics::drawLines(size_t numColumns, size_t numRows) {
 
 	SDL_SetRenderDrawColor(renderer, 0, 192, 255, SDL_ALPHA_OPAQUE);
 	for (int x = 0; x <= numColumns; ++x) {
-		SDL_RenderDrawLine(renderer, (x + translation.first) * deltaX, translation.second * cellHeight * zoom, (x + translation.first) * deltaX, (simulationHeight + translation.second * cellHeight) * zoom);
+		SDL_RenderDrawLine(renderer, x * deltaX + translation.first, translation.second, x * deltaX + translation.first, simulationHeight * zoom + translation.second);
 	}
 	for (int y = 0; y <= numRows; ++y) {
-		SDL_RenderDrawLine(renderer, translation.first * cellWidth * zoom, (y + translation.second) * deltaY, (simulationWidth + translation.first * cellWidth) * zoom, (y + translation.second) * deltaY);
+		SDL_RenderDrawLine(renderer, translation.first, y * deltaY + translation.second, simulationWidth * zoom + translation.first, y * deltaY + translation.second);
 	}
 }
 
 windowCoordinate LifeGraphics::scaleCoordinate(const windowCoordinate& coord) {
-	return { coord.first * zoom + translation.first, coord.second * zoom + translation.second };
+	return { coord.first * cellWidth * zoom + translation.first, coord.second * cellHeight * zoom + translation.second };
 }
 
 // translates from -+ to all +
@@ -97,7 +97,7 @@ coordinate LifeGraphics::translateCoordinateFromGrid(const coordinate& coord) {
 }
 
 coordinate LifeGraphics::windowToCell(const int x, const int y) {
-	return { (long)(x / (cellWidth * zoom)) + grid->bounds.minX, (long)(y / (cellHeight * zoom)) + grid->bounds.minY };
+	return { (long)((x - translation.first) / (cellWidth * zoom)) + grid->bounds.minX, (long)((y - translation.second) / (cellHeight * zoom)) + grid->bounds.minY };
 }
 
 // cell is in LifeGrid coordinates
@@ -105,8 +105,8 @@ void LifeGraphics::colorCell(const coordinate& cell) {
 	windowCoordinate windowCoord = scaleCoordinate(translateCoordinateFromGrid(cell));
 
 	SDL_Rect rect;
-	rect.x = windowCoord.first * cellWidth;
-	rect.y = windowCoord.second * cellHeight;
+	rect.x = windowCoord.first;
+	rect.y = windowCoord.second;
 	rect.w = cellWidth * zoom;
 	rect.h = cellHeight * zoom;
 
