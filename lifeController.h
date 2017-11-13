@@ -5,6 +5,7 @@
 
 class LifeController {
 public:
+	LifeController();
 	LifeController(LifeGrid *gridIn);
 	LifeController(LifeGrid *gridIn, std::istream& input);
 

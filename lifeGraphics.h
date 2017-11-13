@@ -1,11 +1,14 @@
 #pragma once
 
 #include "lifeGrid.h"
+#include "lifeMenu.h"
 #include <SDL2/SDL.h>
+
+using windowCoordinate = std::pair<double, double>;
 
 class LifeGraphics {
 public:
-	LifeGraphics(LifeGrid *gridIn, size_t width, size_t height);
+	LifeGraphics(LifeGrid *gridIn, int width, int height);
 	~LifeGraphics();
 
 	void tick();
@@ -14,19 +17,28 @@ public:
 	bool quit;
 private:
 	LifeGrid *grid;
+	LifeMenu menu;
 
 	SDL_Window *window;
 	SDL_Renderer *renderer;
 
-	size_t windowWidth;
-	size_t windowHeight;
+	int windowWidth;
+	int windowHeight;
+
+	int simulationWidth;
+	int simulationHeight;
 
 	double cellWidth;
 	double cellHeight;
 
+	double zoom;
+	windowCoordinate translation;
+
 	int loadSDL();
 
-	coordinate translateCoordinate(const coordinate& coord);
+	windowCoordinate scaleCoordinate(const windowCoordinate& coord);
+
+	coordinate translateCoordinateFromGrid(const coordinate& coord);
 	coordinate windowToCell(const int x, const int y);
 
 	void colorCell(const coordinate& cell);

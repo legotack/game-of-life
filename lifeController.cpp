@@ -10,6 +10,9 @@ long strToLong(string str);
 /* regex pattern to match input in the form "(x, y)" */
 const regex INPUT_PATTERN("\\((-?[0-9]+),\\s*(-?[0-9]+)\\)");
 
+LifeController::LifeController()
+	: grid(nullptr) { }
+
 LifeController::LifeController(LifeGrid *gridIn)
 	: grid(gridIn) { }
 
