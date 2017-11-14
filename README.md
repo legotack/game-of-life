@@ -24,3 +24,11 @@ Up and Down arrow keys to zoom in and out.
 Left and Right arrow keys to speed up and slow down the evolution.
 Left click to turn a cell alive, right click to make it die.
 Z to autozoom to a random alive cell. Useful for huge grids where you may not be able to see the alive cells from a wide camera view.
+
+
+
+Some screenshots:
+
+![Glider](images/glider.png)
+
+![Glider Gun](images/glider-gun.png)
