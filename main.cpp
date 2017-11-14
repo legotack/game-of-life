@@ -1,17 +1,26 @@
-#include <iostream>
+/**
+	Program: Game of Life
+	Author: Jack Seibert
+
+	This program implements Conway's Game of Life. This
+	file sets up the grid, graphics manager, and
+	controller, and runs the mainloop.
+*/
+
 #include "lifeController.h"
 #include "lifeGraphics.h"
-#include "lifeSamples.h"
-#include <sstream>
-#include <fstream>
+#include <fstream> // for ifstream
 
 using namespace std;
+
+void mainloop(const LifeController& controller, LifeGraphics& graphics);
 
 const size_t WINDOW_WIDTH = 640;
 const size_t WINDOW_HEIGHT = 640; // 720 for menu
 const int INITIAL_SPEED = 5;
 
 const long DEFAULT_RADIUS = 20;
+const string DEFAULT_FILE = "samples/default.txt";
 
 int main(int argc, char *argv[]) {
 	long radius;
@@ -22,27 +31,28 @@ int main(int argc, char *argv[]) {
 
 	LifeGraphics graphics(&grid, WINDOW_WIDTH, WINDOW_HEIGHT, INITIAL_SPEED);
 
-	LifeController controller;
-	if (argc < 3) {
-		stringstream stream(LifeSamples::samples["Glider"]);
-		controller = LifeController(&grid, stream);
-	} else {
-		ifstream stream((string(argv[2])));
-		controller = LifeController(&grid, stream);
+	string filename = DEFAULT_FILE;
+	if (argc >= 3) {
+		filename = string(argv[2]);
 	}
 
+	ifstream stream(filename);
+	LifeController controller(&grid, stream);
+	stream.close();
 	
+	mainloop(controller, graphics);
+
+	return 0;
+}
+
+void mainloop(const LifeController& controller, LifeGraphics& graphics) {
 	int sinceLastGeneration = 0;
 	while (!graphics.quit) {
-		if (!graphics.paused)++sinceLastGeneration;
-		//controller.outputWorld(cout);
+		if (!graphics.paused) ++sinceLastGeneration;
 		graphics.tick();
-		// experiment with order of these
 		if (sinceLastGeneration >= graphics.getSpeed()) {
-			controller.tick();
+			controller.nextGeneration();
 			sinceLastGeneration = 0;
 		}
 	}
-
-	return 0;
 }
