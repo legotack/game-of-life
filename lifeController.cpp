@@ -5,8 +5,6 @@
 
 using namespace std;
 
-long strToLong(string str);
-
 /* regex pattern to match input in the form "(x, y)" */
 const regex INPUT_PATTERN("\\((-?[0-9]+),\\s*(-?[0-9]+)\\)");
 
@@ -23,7 +21,7 @@ LifeController::LifeController(LifeGrid *gridIn, istream& input)
 	while (line != "") {
 		smatch matches;
 		if (regex_match(line, matches, INPUT_PATTERN)) {
-			grid->setAlive(strToLong(matches[1]), strToLong(matches[2]), true);
+			grid->setAlive(stol(matches[1]), stol(matches[2]), true);
 		} else {
 			// make this pretty
 			throw "Invalid input: " + line;
@@ -31,13 +29,6 @@ LifeController::LifeController(LifeGrid *gridIn, istream& input)
 		if (input.eof()) break;
 		getline(input, line);
 	}
-}
-
-long strToLong(string str) {
-	stringstream stream(str);
-	long result;
-	stream >> result;
-	return result;
 }
 
 // see if you can do this smarter, to only look near alive cells

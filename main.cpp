@@ -11,19 +11,23 @@ const size_t WINDOW_WIDTH = 640;
 const size_t WINDOW_HEIGHT = 640; // 720 for menu
 const int INITIAL_SPEED = 5;
 
-const string SAMPLE_INPUT = "(1, 0)\n(2, 1)\n(2, 2)\n(1, 2)\n(0, 2)\n(-2000000000002, -2000000000000)\n(-2000000000001, -2000000000000)\n(-2000000000000, -2000000000000)\n";
+const long DEFAULT_RADIUS = 20;
 
 int main(int argc, char *argv[]) {
-	LifeGrid grid(4000);
+	long radius;
+	if (argc < 2) radius = DEFAULT_RADIUS;
+	else radius = stol(string(argv[1]));
+
+	LifeGrid grid(radius);
 
 	LifeGraphics graphics(&grid, WINDOW_WIDTH, WINDOW_HEIGHT, INITIAL_SPEED);
 
 	LifeController controller;
-	if (argc < 2) {
+	if (argc < 3) {
 		stringstream stream(LifeSamples::samples["Glider"]);
 		controller = LifeController(&grid, stream);
 	} else {
-		ifstream stream((string(argv[1])));
+		ifstream stream((string(argv[2])));
 		controller = LifeController(&grid, stream);
 	}
 

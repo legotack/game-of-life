@@ -52,7 +52,7 @@ private:
 
 	void handleEvent(const SDL_Event& event);
 	void handleKeys();
-	void clickedOnCell(const int mouseX, const int mouseY);
+	void clickedOnCell(const int mouseX, const int mouseY, const bool alive);
 
 	void zoomBy(const double zoomAmount);
 	void autozoom();

@@ -134,16 +134,20 @@ void LifeGraphics::handleEvent(const SDL_Event& event) {
 	if (event.type == SDL_MOUSEBUTTONDOWN) {
 		if (event.button.button == SDL_BUTTON_LEFT) {
 			if (event.button.y < simulationHeight)
-				clickedOnCell(event.button.x, event.button.y);
+				clickedOnCell(event.button.x, event.button.y, true);
 			else
 				menu.handleClick(event.button.x, event.button.y);
+		} else if (event.button.button == SDL_BUTTON_RIGHT) {
+			clickedOnCell(event.button.x, event.button.y, false);
 		}
 	} else if (event.type == SDL_MOUSEMOTION) {
 		if (event.motion.state & SDL_BUTTON_LMASK) {
 			if (event.motion.y < simulationHeight)
-				clickedOnCell(event.motion.x, event.motion.y);
+				clickedOnCell(event.motion.x, event.motion.y, true);
 			else
 				menu.handleClick(event.motion.x, event.motion.y);
+		} else if (event.motion.state & SDL_BUTTON_RMASK) {
+			clickedOnCell(event.motion.x, event.motion.y, false);
 		}
 	} else if (event.type == SDL_KEYDOWN) {
 		if (event.key.keysym.sym == SDLK_SPACE && event.key.repeat == 0)
@@ -176,9 +180,9 @@ void LifeGraphics::handleKeys() {
 		translation.first -= DELTA_TRANSLATION;
 }
 
-void LifeGraphics::clickedOnCell(const int mouseX, const int mouseY) {
+void LifeGraphics::clickedOnCell(const int mouseX, const int mouseY, const bool alive) {
 	if (mouseY != 0) // to keep from title bar clicks
-		grid->setAlive(windowToCell(mouseX, mouseY), true);
+		grid->setAlive(windowToCell(mouseX, mouseY), alive);
 }
 
 void LifeGraphics::zoomBy(const double zoomAmount) {
