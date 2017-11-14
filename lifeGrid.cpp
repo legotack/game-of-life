@@ -19,10 +19,10 @@ LifeGrid::LifeGrid(const LifeGrid& copy) {
 
 coordinate LifeGrid::wrapCoordinate(const coordinate cell) const {
 	// Begins by translating coordinates to allow for wrapping
-	long absoluteMaxX = bounds.maxX - bounds.minX + 1;
-	long absoluteMaxY = bounds.maxY - bounds.minY + 1;
-	long translatedX = cell.first - bounds.minX;
-	long translatedY = cell.second - bounds.minY;
+	unsigned long absoluteMaxX = bounds.maxX - bounds.minX + 1;
+	unsigned long absoluteMaxY = bounds.maxY - bounds.minY + 1;
+	unsigned long translatedX = cell.first - bounds.minX;
+	unsigned long translatedY = cell.second - bounds.minY;
 
 	long wrappedX = (absoluteMaxX + translatedX % absoluteMaxX) % absoluteMaxX + bounds.minX;
 	long wrappedY = (absoluteMaxY + translatedY % absoluteMaxY) % absoluteMaxY + bounds.minY;
