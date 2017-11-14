@@ -1,7 +1,8 @@
 #include "lifeGraphics.h"
 #include <iostream>
-#include <algorithm>
 #include <math.h>
+#include <stdlib.h>
+#include <iterator>
 
 using namespace std;
 
@@ -182,17 +183,24 @@ void LifeGraphics::clickedOnCell(const int mouseX, const int mouseY) {
 
 void LifeGraphics::zoomBy(const double zoomAmount) {
 	zoom *= zoomAmount;
-	translation.first = (translation.first - simulationWidth / 2) * zoomAmount + simulationWidth / 2;
-	translation.second = (translation.second - simulationHeight / 2) * zoomAmount + simulationHeight / 2;
+	translation.first = (translation.first - (double)simulationWidth / 2) * zoomAmount + (double)simulationWidth / 2;
+	translation.second = (translation.second - (double)simulationHeight / 2) * zoomAmount + (double)simulationHeight / 2;
 }
 
 void LifeGraphics::autozoom() {
-	coordinate cell = *(grid->getAliveCells().begin());
-	translation = { 0, 0 };
-	zoom = 1;
-	zoomBy(AUTOZOOM_CELL_SIZE / cellWidth);
-	translation.first -= AUTOZOOM_CELL_SIZE * cell.first;
-	translation.second -= AUTOZOOM_CELL_SIZE * cell.second;
+	if (grid->getAliveCells().empty()) {
+		zoomBy(AUTOZOOM_CELL_SIZE / cellWidth / zoom);
+	} else {
+		setType aliveSet = grid->getAliveCells();
+		auto randomIt = aliveSet.begin();
+		advance(randomIt, rand() % (aliveSet.size() - 1));
+		coordinate cell = *randomIt;
+		translation = { 0, 0 };
+		zoom = 1;
+		zoomBy(AUTOZOOM_CELL_SIZE / cellWidth);
+		translation.first -= AUTOZOOM_CELL_SIZE * cell.first;
+		translation.second -= AUTOZOOM_CELL_SIZE * cell.second;
+	}
 }
 
 int LifeGraphics::getSpeed() {
