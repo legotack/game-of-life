@@ -1,11 +1,20 @@
 # game-of-life
-Implements Conway's Game of Life in C++, using SDL for graphics. Requires SDL and Boost. Feel free to edit the Makefile to refer to your 
+Implements Conway's Game of Life in C++. Requires SDL2 and Boost, which can be downloaded here:
+
+SDL2: https://www.libsdl.org/download-2.0.php
+Boost: http://www.boost.org/users/history/version_1_65_1.html
+
+Feel free to edit the Makefile to point to where you have installed these libraries.
+(I was having issues statically linking to create a standalone binary. Let me know if downloading Boost and SDL2 presents any issues.)
 
 Usage:
 
 ./game-of-life [radius] [input_file]
 
-Input file should be a newline-separated list of coordinates to place alive cells.
+Radius defines the number of cells, from the center, that will be created in the world. (Note that the world wraps around at edges, so even if an input greater than the bounds of the world is input, it will still be valid.)
+Input file should be a newline-separated list of coordinates at which to place alive cells.
+
+A few sample input files are included in the "samples" directory, as well as a small python script that will generate random patterns.
 
 Controls:
 

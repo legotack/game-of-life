@@ -1,3 +1,7 @@
+# File: random_life.py
+# Author: Jack Seibert
+# Randomly generates a world to load into game-of-life
+
 import sys
 import random
 
