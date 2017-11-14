@@ -41,7 +41,7 @@ void LifeGrid::setAlive(const coordinate cell, const bool alive) {
 		aliveSet.erase(wrapCoordinate(cell));
 }
 
-cellSet LifeGrid::getAliveCells() const {
+const cellSet& LifeGrid::getAliveCells() const {
 	return aliveSet;
 }
 

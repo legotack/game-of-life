@@ -68,7 +68,7 @@ public:
 	   -----------------------
 	   Returns a set of all alive cells.
 	*/
-	cellSet getAliveCells() const;
+	const cellSet& getAliveCells() const;
 	/* Function: getNumBuckets
 	   -----------------------
 	   Returns the number of buckets used in the unordered_set
