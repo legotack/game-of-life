@@ -1,81 +1,60 @@
 #include "lifeGrid.h"
-#include <regex>
-#include <string>
-#include <sstream>
-#include <limits>
 
 using namespace std;
 
-long strToLong(string str);
-
-/* regex pattern to match input in the form "(x, y)" */
-const regex INPUT_PATTERN("\\((-?[0-9]+),\\s*(-?[0-9]+)\\)");
-
-LifeGrid::LifeGrid(istream& input) {
-	minRow = maxRow = minCol = maxCol = 0;
-
-	string line;
-	getline(input, line);
-	while (!input.eof() && line != "") {
-		smatch matches;
-		if (regex_match(line, matches, INPUT_PATTERN)) {
-			setCell(strToLong(matches[1]), strToLong(matches[2]), true);
-		} else {
-			// make this pretty
-			throw "Invalid input: " + line;
-		}
-		getline(input, line);
-	}
+LifeGrid::LifeGrid(const size_t radiusIn)
+	: radius(radiusIn) {
+	bounds.minX = bounds.minY = -radius;
+	bounds.maxX = bounds.maxY = radius;
 }
 
-long strToLong(string str) {
-	stringstream stream(str);
-	long result;
-	stream >> result;
-	return result;
+LifeGrid::LifeGrid(const size_t radiusIn, const size_t numBuckets)
+	: LifeGrid::LifeGrid(radiusIn) {
+	aliveSet.rehash(numBuckets);
 }
 
-LifeGrid::LifeGrid(LifeGrid& copy) {
-	grid = copy.grid;
+LifeGrid::LifeGrid(const LifeGrid& copy) {
+	aliveSet = copy.aliveSet;
 }
 
-void LifeGrid::setCell(const long row, const long col, const bool alive) {
-	if (row < minRow) minRow = row;
-	if (row > maxRow) maxRow = row;
-	if (col < minCol) minCol = col;
-	if (col > maxCol) maxCol = col;
+coordinate LifeGrid::wrapCoordinate(const coordinate cell) const {
+	// Begins by translating coordinates to allow for wrapping
+	long absoluteMaxX = bounds.maxX - bounds.minX + 1;
+	long absoluteMaxY = bounds.maxY - bounds.minY + 1;
+	long translatedX = cell.first - bounds.minX;
+	long translatedY = cell.second - bounds.minY;
 
-	grid[{ row, col }] = alive;
+	long wrappedX = (absoluteMaxX + translatedX % absoluteMaxX) % absoluteMaxX + bounds.minX;
+	long wrappedY = (absoluteMaxY + translatedY % absoluteMaxY) % absoluteMaxY + bounds.minY;
+
+	return { wrappedX, wrappedY };
 }
 
-bool LifeGrid::getCell(const long row, const long col) const {
-	auto elem = grid.find({ row, col });
-	if (elem == grid.end()) return false;
-	else return elem->second;
+bool LifeGrid::isAlive(const coordinate cell) const {
+	return aliveSet.find(wrapCoordinate(cell)) != aliveSet.end();
 }
 
-void LifeGrid::tick() {
-	LifeGrid newGrid(*this);
-
-	for (long i = minRow; i <= maxRow; ++i) {
-		for (long j = minCol; j <= maxCol; ++j) {
-			int aliveNeighbors = countAliveNeighbors(i, j);
-			if (aliveNeighbors == 3 || (aliveNeighbors == 2 && getCell(i, j)))
-				newGrid.setCell(i, j, true);
-			else
-				newGrid.setCell(i, j, false);
-		}
-	}
-
-	grid = newGrid.grid;
+void LifeGrid::setAlive(const coordinate cell, const bool alive) {
+	if (alive)
+		aliveSet.insert(wrapCoordinate(cell));
+	else
+		aliveSet.erase(wrapCoordinate(cell));
 }
 
-int LifeGrid::countAliveNeighbors(const long row, const long col) const {
+cellSet LifeGrid::getAliveCells() const {
+	return aliveSet;
+}
+
+size_t LifeGrid::getNumBuckets() const {
+	return aliveSet.bucket_count();
+}
+
+int LifeGrid::countAliveNeighbors(const coordinate cell) const {
 	int counter = 0;
-	for (long i = row - 1; i <= row + 1; ++i) {
-		for (long j = col - 1; j <= col + 1; ++j) {
-			if (i != row || j != col) {
-				if (getCell(i, j))
+	for (long i = cell.second - 1; i <= cell.second + 1; ++i) {
+		for (long j = cell.first - 1; j <= cell.first + 1; ++j) {
+			if (i != cell.second || j != cell.first) {
+				if (isAlive({ j, i }))
 					++counter;
 			}
 		}
@@ -84,9 +63,11 @@ int LifeGrid::countAliveNeighbors(const long row, const long col) const {
 }
 
 ostream& operator<<(ostream& stream, const LifeGrid& gr) {
-	for (long i = gr.minRow; i <= gr.maxRow; ++i) {
-		for (long j = gr.minCol; j <= gr.maxCol; ++j) {
-			if (gr.getCell(i, j))
+	for (long i = gr.bounds.minY; i <= gr.bounds.maxY; ++i) {
+		for (long j = gr.bounds.minX; j <= gr.bounds.maxX; ++j) {
+			if (i == 0 && j == 0)
+				stream << "O "; // marks the center
+			else if (gr.isAlive({ j, i }))
 				stream << "X ";
 			else
 				stream << "- ";
